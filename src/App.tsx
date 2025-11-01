@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Dayjs } from "dayjs";
 import CurrencyFilter from "./components/CurrencyFilter";
+import LineChart from "./components/LineChart";
 import { Segmented, Radio } from "antd";
 import { LineChartOutlined, TableOutlined } from "@ant-design/icons";
 import "./App.css";
@@ -42,17 +43,23 @@ function App() {
         />
       </div>
       <div className="content-area">
-        <CurrencyFilter
-          baseCurrency={baseCurrency}
-          targetCurrency={targetCurrencies}
-          onBaseCurrencyChange={setBaseCurrency}
-          onTargetCurrencyChange={setTargetCurrencies}
-          onSwap={handleSwap}
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
-        />
+        {currentView === "chart" ? (
+          <LineChart />
+        ) : (
+          <>
+            <CurrencyFilter
+              baseCurrency={baseCurrency}
+              targetCurrency={targetCurrencies}
+              onBaseCurrencyChange={setBaseCurrency}
+              onTargetCurrencyChange={setTargetCurrencies}
+              onSwap={handleSwap}
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+            />
+          </>
+        )}
         {currentView === "table" && (
           <div className="table-switcher" style={{ marginTop: 12 }}>
             <Radio.Group
