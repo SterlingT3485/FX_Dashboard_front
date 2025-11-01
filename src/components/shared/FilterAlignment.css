@@ -1,0 +1,79 @@
+/* Horizontal Alignment For Filters */
+.filter-alignment-wrapper {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-component {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Label Styles */
+.filter-label {
+  color: #58a6ff;
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.3);
+  letter-spacing: 0.5px;
+}
+
+/* Base Currency Selector */
+.base-currency-filter {
+  min-width: 200px;
+  flex: 1;
+  max-width: 280px;
+}
+
+/* Target Currency Selector */
+.target-currency-filter {
+  min-width: 200px;
+  flex: 1;
+  max-width: 280px;
+}
+
+/* Currency Swap Button */
+.currency-swap-button {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+/* Date Range Selector */
+.date-range-filter {
+  min-width: 280px;
+  max-width: 350px;
+}
+
+/* Input Box Styles */
+.filter-input {
+  height: 44px !important;
+  min-height: 44px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .filter-alignment-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .base-currency-filter,
+  .target-currency-filter,
+  .date-range-filter {
+    max-width: 100%;
+    min-width: unset;
+  }
+  
+  .currency-swap-button {
+    align-self: center;
+    margin-bottom: 8px;
+  }
+}
