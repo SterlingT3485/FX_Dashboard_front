@@ -3,6 +3,7 @@ import type { Dayjs } from "dayjs";
 import CurrencyFilter from "./components/CurrencyFilter";
 import LineChart from "./components/LineChart";
 import ExchangeRateByDate from "./components/ExchangeRateByDate";
+import ExchangeRateTrends from "./components/ExchangeRateTrends";
 import { Segmented, Radio } from "antd";
 import { LineChartOutlined, TableOutlined } from "@ant-design/icons";
 import "./App.css";
@@ -42,28 +43,30 @@ function App() {
           size="large"
           style={{ margin: "16px" }}
         />
-        {currentView === "table" && (
-          <div className="table-switcher" style={{ margin: "0 16px 12px 16px" }}>
-            <Radio.Group
-              options={[
-                { label: "Date Table", value: "table1" },
-                { label: "Trend Table", value: "table2" },
-              ]}
-              onChange={(e) => setCurrentTable(e.target.value as TableType)}
-              value={currentTable}
-              optionType="button"
-              buttonStyle="solid"
-              size="large"
-            />
-          </div>
-        )}
       </div>
       <div className="content-area">
         {currentView === "chart" ? (
           <LineChart />
         ) : (
           <>
+            <div className="table-switcher">
+              <div className="tech-radio-container">
+                <Radio.Group
+                  options={[
+                    { label: "Date Table", value: "table1" },
+                    { label: "Trend Table", value: "table2" },
+                  ]}
+                  onChange={(e) => setCurrentTable(e.target.value as TableType)}
+                  value={currentTable}
+                  optionType="button"
+                  buttonStyle="solid"
+                  size="large"
+                  className="tech-radio-group"
+                />
+              </div>
+            </div>
             {currentTable === "table1" && <ExchangeRateByDate />}
+            {currentTable === "table2" && <ExchangeRateTrends />}
           </>
         )}
         {currentView === "chart" && (
