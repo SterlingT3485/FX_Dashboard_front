@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Dayjs } from "dayjs";
 import CurrencyFilter from "./components/CurrencyFilter";
 import LineChart from "./components/LineChart";
+import ExchangeRateByDate from "./components/ExchangeRateByDate";
 import { Segmented, Radio } from "antd";
 import { LineChartOutlined, TableOutlined } from "@ant-design/icons";
 import "./App.css";
@@ -41,27 +42,8 @@ function App() {
           size="large"
           style={{ margin: "16px" }}
         />
-      </div>
-      <div className="content-area">
-        {currentView === "chart" ? (
-          <LineChart />
-        ) : (
-          <>
-            <CurrencyFilter
-              baseCurrency={baseCurrency}
-              targetCurrency={targetCurrencies}
-              onBaseCurrencyChange={setBaseCurrency}
-              onTargetCurrencyChange={setTargetCurrencies}
-              onSwap={handleSwap}
-              startDate={startDate}
-              endDate={endDate}
-              onStartDateChange={setStartDate}
-              onEndDateChange={setEndDate}
-            />
-          </>
-        )}
         {currentView === "table" && (
-          <div className="table-switcher" style={{ marginTop: 12 }}>
+          <div className="table-switcher" style={{ margin: "0 16px 12px 16px" }}>
             <Radio.Group
               options={[
                 { label: "Date Table", value: "table1" },
@@ -75,16 +57,26 @@ function App() {
             />
           </div>
         )}
-        <div style={{ marginTop: 16 }}>
-          <h3 style={{ marginBottom: 8 }}>Filter INFO</h3>
-          <div>Base: {baseCurrency}</div>
-          <div>Targets: {targetCurrencies.join(", ") || "(none)"}</div>
-          <div>
-            Date Range: {startDate ? startDate.format("YYYY-MM-DD") : "(none)"} - {endDate ? endDate.format("YYYY-MM-DD") : "(none)"}
+      </div>
+      <div className="content-area">
+        {currentView === "chart" ? (
+          <LineChart />
+        ) : (
+          <>
+            {currentTable === "table1" && <ExchangeRateByDate />}
+          </>
+        )}
+        {currentView === "chart" && (
+          <div style={{ marginTop: 16 }}>
+            <h3 style={{ marginBottom: 8 }}>Filter INFO</h3>
+            <div>Base: {baseCurrency}</div>
+            <div>Targets: {targetCurrencies.join(", ") || "(none)"}</div>
+            <div>
+              Date Range: {startDate ? startDate.format("YYYY-MM-DD") : "(none)"} - {endDate ? endDate.format("YYYY-MM-DD") : "(none)"}
+            </div>
+            <div>View: {currentView}</div>
           </div>
-          <div>View: {currentView}</div>
-          {currentView === "table" && <div>Table: {currentTable}</div>}
-        </div>
+        )}
       </div>
     </div>
   );
