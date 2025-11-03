@@ -175,4 +175,3 @@ FX_Dashboard_front/
 └── package.json             # Project dependencies
 ```
 
-See LICENSE file for details.
