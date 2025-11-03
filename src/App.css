@@ -205,3 +205,8 @@
 .center-header .ag-header-cell-label {
   justify-content: center;
 }
+
+/* Hide the short vertical line in the ag-grid table header */
+.ag-header-cell-resize::after {
+  display: none !important;
+}

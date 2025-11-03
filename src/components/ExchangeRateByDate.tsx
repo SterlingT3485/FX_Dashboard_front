@@ -143,8 +143,10 @@ const ExchangeRateByDate: React.FC = () => {
   return (
     <div
       style={{
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
+        overflow: 'hidden',
       }}
     >
       <h3
@@ -208,15 +210,13 @@ const ExchangeRateByDate: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        <div style={{ width: '100%' }}>
+        <div style={{ flex: 1, width: '100%', minHeight: 0 }}>
           <AgGridReact
             theme={darkTheme}
             ref={gridRef}
             columnDefs={columnDefs}
             rowData={fullTableData}
             loading={loading}
-            autoSizeStrategy={{ type: 'fitGridWidth' }}
-            domLayout={'autoHeight'}
             suppressMovableColumns={true}
             pagination={true}
             paginationPageSize={pageSize}
@@ -224,10 +224,12 @@ const ExchangeRateByDate: React.FC = () => {
             onPaginationChanged={handlePaginationChanged}
             defaultColDef={{
               sortable: true,
-              resizable: false,
+              resizable: true,
               flex: 1,
               minWidth: 120,
               headerClass: 'center-header',
+              cellStyle: { borderRight: '1px solid #444' },
+              headerStyle: { borderRight: '1px solid #444' },
             }}
             overlayNoRowsTemplate={
               loading ? 'Loading exchange rate data...' : 'No data available'
