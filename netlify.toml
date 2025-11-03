@@ -1,0 +1,16 @@
+[build]
+  command = "yarn build"
+  publish = "dist"
+
+# API Proxy Configuration
+[[redirects]]
+  from = "/api/*"
+  to = "https://fx-backend-demo-a3914b7d1725.herokuapp.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback - all routes return index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
