@@ -1,29 +1,85 @@
-import { useState } from "react";
-import type { Dayjs } from "dayjs";
-import CurrencyFilter from "./components/CurrencyFilter";
+import { useState, useEffect } from "react";
+import { Segmented, Radio } from "antd";
+import { LineChartOutlined, TableOutlined } from "@ant-design/icons";
 import LineChart from "./components/LineChart";
 import ExchangeRateByDate from "./components/ExchangeRateByDate";
 import ExchangeRateTrends from "./components/ExchangeRateTrends";
-import { Segmented, Radio } from "antd";
-import { LineChartOutlined, TableOutlined } from "@ant-design/icons";
+import { URL_KEYS, getStringParam, updateURLParams } from "./utils/urlParams";
 import "./App.css";
 
 type ViewType = "chart" | "table";
 type TableType = "table1" | "table2";
 
 function App() {
-  const [baseCurrency, setBaseCurrency] = useState<string>("USD");
-  const [targetCurrencies, setTargetCurrencies] = useState<string[]>(["EUR"]);
-  const [startDate, setStartDate] = useState<Dayjs | null>(null);
-  const [endDate, setEndDate] = useState<Dayjs | null>(null);
-  const [currentView, setCurrentView] = useState<ViewType>("chart");
-  const [currentTable, setCurrentTable] = useState<TableType>("table1");
+  // Initialize from URL params
+  const [currentView, setCurrentView] = useState<ViewType>(
+    (getStringParam(URL_KEYS.VIEW, "chart") as ViewType) || "chart"
+  );
+  const [currentTable, setCurrentTable] = useState<TableType>(
+    (getStringParam(URL_KEYS.TABLE, "table1") as TableType) || "table1"
+  );
 
-  const handleSwap = () => {
-    if (targetCurrencies.length === 1) {
-      const [onlyTarget] = targetCurrencies;
-      setBaseCurrency(onlyTarget);
-      setTargetCurrencies([baseCurrency]);
+  // Update URL when view changes
+  useEffect(() => {
+    updateURLParams({
+      [URL_KEYS.VIEW]: currentView,
+    });
+  }, [currentView]);
+
+  // Update URL when table changes
+  useEffect(() => {
+    updateURLParams({
+      [URL_KEYS.TABLE]: currentTable,
+    });
+  }, [currentTable]);
+
+  const viewOptions = [
+    {
+      label: "Line Chart",
+      value: "chart",
+      icon: <LineChartOutlined />,
+    },
+    {
+      label: "Table",
+      value: "table",
+      icon: <TableOutlined />,
+    },
+  ];
+
+  const tableOptions = [
+    { label: "Date Table", value: "table1" },
+    { label: "Trend Table", value: "table2" },
+  ];
+
+  const renderContent = () => {
+    if (currentView === "chart") {
+      return (
+        <LineChart />
+      );
+    } else {
+      return (
+        <>
+          <div className="table-switcher">
+            <div className="tech-radio-container">
+              <Radio.Group
+                options={tableOptions}
+                onChange={(e) => {
+                  const newTable = e.target.value as TableType;
+                  setCurrentTable(newTable);
+                  updateURLParams({ [URL_KEYS.TABLE]: newTable });
+                }}
+                value={currentTable}
+                optionType="button"
+                buttonStyle="solid"
+                size="large"
+                className="tech-radio-group"
+              />
+            </div>
+          </div>
+          {currentTable === "table1" && <ExchangeRateByDate />}
+          {currentTable === "table2" && <ExchangeRateTrends />}
+        </>
+      );
     }
   };
 
@@ -34,53 +90,20 @@ function App() {
       </header>
       <div className="tab-slider">
         <Segmented
-          options={[
-            { label: "Line Chart", value: "chart", icon: <LineChartOutlined /> },
-            { label: "Table", value: "table", icon: <TableOutlined /> },
-          ]}
+          options={viewOptions}
           value={currentView}
-          onChange={(value) => setCurrentView(value as ViewType)}
+          onChange={(value) => {
+            const newView = value as ViewType;
+            setCurrentView(newView);
+            updateURLParams({ [URL_KEYS.VIEW]: newView });
+          }}
           size="large"
-          style={{ margin: "16px" }}
+          style={{
+            margin: "16px",
+          }}
         />
       </div>
-      <div className="content-area">
-        {currentView === "chart" ? (
-          <LineChart />
-        ) : (
-          <>
-            <div className="table-switcher">
-              <div className="tech-radio-container">
-                <Radio.Group
-                  options={[
-                    { label: "Date Table", value: "table1" },
-                    { label: "Trend Table", value: "table2" },
-                  ]}
-                  onChange={(e) => setCurrentTable(e.target.value as TableType)}
-                  value={currentTable}
-                  optionType="button"
-                  buttonStyle="solid"
-                  size="large"
-                  className="tech-radio-group"
-                />
-              </div>
-            </div>
-            {currentTable === "table1" && <ExchangeRateByDate />}
-            {currentTable === "table2" && <ExchangeRateTrends />}
-          </>
-        )}
-        {currentView === "chart" && (
-          <div style={{ marginTop: 16 }}>
-            <h3 style={{ marginBottom: 8 }}>Filter INFO</h3>
-            <div>Base: {baseCurrency}</div>
-            <div>Targets: {targetCurrencies.join(", ") || "(none)"}</div>
-            <div>
-              Date Range: {startDate ? startDate.format("YYYY-MM-DD") : "(none)"} - {endDate ? endDate.format("YYYY-MM-DD") : "(none)"}
-            </div>
-            <div>View: {currentView}</div>
-          </div>
-        )}
-      </div>
+      <div className="content-area">{renderContent()}</div>
     </div>
   );
 }
