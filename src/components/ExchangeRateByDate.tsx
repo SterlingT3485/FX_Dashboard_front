@@ -6,6 +6,16 @@ import { ModuleRegistry, AllCommunityModule, themeQuartz, colorSchemeDark } from
 import dayjs, { Dayjs } from "dayjs";
 import UnifiedTableFilter from "./UnifiedTableFilter";
 import { useTimeSeriesRates, useCurrencies } from "../utils";
+import {
+  URL_KEYS,
+  getStringParam,
+  getArrayParam,
+  getDateParam,
+  getNumberParam,
+  updateURLParams,
+  formatDateForURL,
+  formatArrayForURL,
+} from "../utils/urlParams";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -18,20 +28,43 @@ interface DateTableDataType {
 }
 
 const ExchangeRateByDate: React.FC = () => {
-  // Local state only (no url params in this phase)
-  const [baseCurrency, setBaseCurrency] = useState<string>("USD");
-  const [targetCurrency, setTargetCurrency] = useState<string[]>(["EUR"]);
-  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().subtract(30, "day"));
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
-  const [pageSize, setPageSize] = useState<number>(20);
+  // Initialize from URL params
+  const [baseCurrency, setBaseCurrency] = useState(
+    getStringParam(URL_KEYS.DATE_BASE, "USD")
+  );
+  const [targetCurrency, setTargetCurrency] = useState<string[]>(
+    getArrayParam(URL_KEYS.DATE_TARGET, ["EUR"])
+  );
+  const [startDate, setStartDate] = useState<Dayjs | null>(
+    getDateParam(URL_KEYS.DATE_START, dayjs().subtract(30, "day"))
+  );
+  const [endDate, setEndDate] = useState<Dayjs | null>(
+    getDateParam(URL_KEYS.DATE_END, dayjs())
+  );
+  const [pageSize, setPageSize] = useState(
+    getNumberParam(URL_KEYS.DATE_PAGESIZE, 20)
+  );
 
+  // Update URL when state changes
+  useEffect(() => {
+    updateURLParams({
+      [URL_KEYS.DATE_BASE]: baseCurrency,
+      [URL_KEYS.DATE_TARGET]: formatArrayForURL(targetCurrency),
+      [URL_KEYS.DATE_START]: formatDateForURL(startDate),
+      [URL_KEYS.DATE_END]: formatDateForURL(endDate),
+      [URL_KEYS.DATE_PAGESIZE]: pageSize.toString(),
+    });
+  }, [baseCurrency, targetCurrency, startDate, endDate, pageSize]);
+
+  // Get currency list
   const { currencyList } = useCurrencies();
 
-  const { data: timeSeriesData, loading, error, refetch } = useTimeSeriesRates({
+  // Get exchange rate data
+  const { data: timeSeriesData, loading, error } = useTimeSeriesRates({
     base: baseCurrency,
     symbols: targetCurrency,
-    start_date: startDate?.format("YYYY-MM-DD") || dayjs().subtract(30, "day").format("YYYY-MM-DD"),
-    end_date: endDate?.format("YYYY-MM-DD") || dayjs().format("YYYY-MM-DD"),
+    start_date: startDate?.format('YYYY-MM-DD') || '',
+    end_date: endDate?.format('YYYY-MM-DD') || '',
   });
 
   const handleSwap = () => {
@@ -66,6 +99,8 @@ const ExchangeRateByDate: React.FC = () => {
         cellStyle: { textAlign: "center" },
       },
     ];
+
+    // Add columns for each target currency
     const targetColumns: ColDef[] = targetCurrency.map((currency) => ({
       field: currency,
       headerName: getCurrencyName(currency),
@@ -75,12 +110,15 @@ const ExchangeRateByDate: React.FC = () => {
       comparator: (a: number, b: number) => (a || 0) - (b || 0),
       cellStyle: { textAlign: "center" },
     }));
+
     return [...baseColumns, ...targetColumns];
   }, [baseCurrency, targetCurrency, currencyList]);
 
+  // Generate full table data
   const fullTableData = useMemo(() => {
     if (!timeSeriesData || !timeSeriesData.rates) return [] as DateTableDataType[];
     const dates = Object.keys(timeSeriesData.rates).sort().reverse();
+
     return dates.map((date) => {
       const row: DateTableDataType = { date, baseCurrency };
       targetCurrency.forEach((currency) => { row[currency] = timeSeriesData.rates[date]?.[currency] || 0; });
@@ -95,6 +133,7 @@ const ExchangeRateByDate: React.FC = () => {
     }
   };
 
+  // Reset page number to 1 when filtering conditions change
   useEffect(() => {
     if (gridRef.current?.api) {
       gridRef.current.api.paginationGoToPage(0);
@@ -102,16 +141,37 @@ const ExchangeRateByDate: React.FC = () => {
   }, [baseCurrency, targetCurrency, startDate, endDate]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <h3 className="tech-table-title" style={{ flexShrink: 0, height: 40, margin: "0 0 16px 0", lineHeight: "40px" }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <h3
+        className='tech-table-title'
+        style={{
+          flexShrink: 0,
+          height: "40px",
+          margin: "0 0 16px 0",
+          lineHeight: "40px",
+        }}
+      >
         Exchange Rate by Date
       </h3>
+
+      {/* Filter */}
       <div style={{ flexShrink: 0, marginBottom: 16 }}>
         <UnifiedTableFilter
           baseCurrency={baseCurrency}
           targetCurrency={targetCurrency}
           onBaseCurrencyChange={setBaseCurrency}
-          onTargetCurrencyChange={(c: string | string[]) => setTargetCurrency(Array.isArray(c) ? c : [c])}
+          onTargetCurrencyChange={(currency: string | string[]) => {
+            if (Array.isArray(currency)) {
+              setTargetCurrency(currency);
+            } else {
+              setTargetCurrency([currency]);
+            }
+          }}
           onSwap={handleSwap}
           startDate={startDate}
           endDate={endDate}
@@ -121,21 +181,34 @@ const ExchangeRateByDate: React.FC = () => {
         />
       </div>
 
+      {/* Error message */}
       {error && (
         <div style={{ flexShrink: 0, marginBottom: 16 }}>
           <Alert
-            message="Failed to load exchange rate data"
+            title="Failed to load exchange rate data"
             description={error}
             type="error"
             showIcon
-            action={<button onClick={refetch} style={{ padding: "4px 8px", backgroundColor: "#1890ff", color: "white", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>Retry</button>}
-            style={{ backgroundColor: "#2d1b1b", border: "1px solid #ff4d4f", borderRadius: 6 }}
+            style={{
+              backgroundColor: '#2d1b1b',
+              border: '1px solid #ff4d4f',
+              borderRadius: 6,
+            }}
           />
         </div>
       )}
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-        <div style={{ width: "100%" }}>
+      {/* Table */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ width: '100%' }}>
           <AgGridReact
             theme={darkTheme}
             ref={gridRef}
@@ -149,8 +222,16 @@ const ExchangeRateByDate: React.FC = () => {
             paginationPageSize={pageSize}
             paginationPageSizeSelector={[10, 20, 50, 100]}
             onPaginationChanged={handlePaginationChanged}
-            defaultColDef={{ sortable: true, resizable: false, flex: 1, minWidth: 120, headerClass: 'center-header' }}
-            overlayNoRowsTemplate={loading ? "Loading exchange rate data..." : "No data available"}
+            defaultColDef={{
+              sortable: true,
+              resizable: false,
+              flex: 1,
+              minWidth: 120,
+              headerClass: 'center-header',
+            }}
+            overlayNoRowsTemplate={
+              loading ? 'Loading exchange rate data...' : 'No data available'
+            }
           />
         </div>
       </div>
