@@ -88,10 +88,11 @@ function App() {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <h1 className="app-title">FX Dashboard</h1>
-      </header>
+
       <div className="tab-slider">
+        <header className="app-header" style={{ borderWidth: 0 }}>
+          <h1 className="app-title">FX Dashboard</h1>
+        </header>
         <Segmented
           options={viewOptions}
           value={currentView}
@@ -102,7 +103,7 @@ function App() {
           }}
           size="large"
           style={{
-            margin: "16px",
+            margin: "0px 16px 16px 16px",
           }}
         />
       </div>

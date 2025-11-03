@@ -10,13 +10,13 @@
 
 .app-header {
   width: 100%;
-  padding: 24px 16px;
+  padding: 40px 16px 0 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(90deg, #161b22 0%, #21262d 100%);
+  /* background: linear-gradient(90deg, #161b22 0%, #21262d 100%); */
   border-bottom: 2px solid rgba(31, 111, 235, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); */
   position: relative;
   z-index: 1;
 }
