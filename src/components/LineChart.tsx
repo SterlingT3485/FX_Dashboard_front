@@ -207,7 +207,37 @@ const LineChart: React.FC = () => {
       />
       <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
         {loading && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>Loading exchange rate data...</div>
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(22, 27, 34, 0.8)",
+              zIndex: 1000,
+              color: "#58a6ff",
+              fontSize: "16px",
+            }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  border: "3px solid rgba(88, 166, 255, 0.3)",
+                  borderTop: "3px solid #58a6ff",
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite",
+                  margin: "0 auto 10px",
+                }}
+              />
+              Loading exchange rate data...
+            </div>
+          </div>
         )}
         {error && (
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#f85149" }}>
@@ -217,6 +247,16 @@ const LineChart: React.FC = () => {
         )}
         <Line data={chartConfig} options={chartOptions} plugins={[verticalHoverLine]} />
       </div>
+      <style>{`
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -54,7 +54,9 @@ function App() {
   const renderContent = () => {
     if (currentView === "chart") {
       return (
-        <LineChart />
+        <div className="chart-container">
+          <LineChart />
+        </div>
       );
     } else {
       return (
@@ -76,8 +78,9 @@ function App() {
               />
             </div>
           </div>
-          {currentTable === "table1" && <ExchangeRateByDate />}
-          {currentTable === "table2" && <ExchangeRateTrends />}
+          <div className="table-container">
+            {currentTable === "table1" ? <ExchangeRateByDate /> : <ExchangeRateTrends />}
+          </div>
         </>
       );
     }
