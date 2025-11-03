@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -16,6 +16,15 @@ import dayjs, { Dayjs } from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import CurrencyFilter from "./CurrencyFilter";
 import { useTimeSeriesRates } from "../utils";
+import {
+  URL_KEYS,
+  getStringParam,
+  getArrayParam,
+  getDateParam,
+  updateURLParams,
+  formatDateForURL,
+  formatArrayForURL,
+} from "../utils/urlParams";
 
 ChartJS.register(
   CategoryScale,
@@ -53,12 +62,33 @@ const verticalHoverLine: Plugin<'line'> = {
 dayjs.extend(weekOfYear);
 
 const LineChart: React.FC = () => {
-  // Local state only (no URL params in this phase)
-  const [baseCurrency, setBaseCurrency] = useState<string>("USD");
-  const [targetCurrency, setTargetCurrency] = useState<string[]>(["EUR"]);
-  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs().subtract(30, "day"));
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
-  const [timePeriod, setTimePeriod] = useState<string>("day");
+  // Initialize from URL params
+  const [baseCurrency, setBaseCurrency] = useState(
+    getStringParam(URL_KEYS.CHART_BASE, "USD")
+  );
+  const [targetCurrency, setTargetCurrency] = useState<string[]>(
+    getArrayParam(URL_KEYS.CHART_TARGET, ["EUR"])
+  );
+  const [startDate, setStartDate] = useState<Dayjs | null>(
+    getDateParam(URL_KEYS.CHART_START, dayjs().subtract(30, "day"))
+  );
+  const [endDate, setEndDate] = useState<Dayjs | null>(
+    getDateParam(URL_KEYS.CHART_END, dayjs())
+  );
+  const [timePeriod, setTimePeriod] = useState(
+    getStringParam(URL_KEYS.CHART_PERIOD, "day")
+  );
+
+  // Update URL when state changes
+  useEffect(() => {
+    updateURLParams({
+      [URL_KEYS.CHART_BASE]: baseCurrency,
+      [URL_KEYS.CHART_TARGET]: formatArrayForURL(targetCurrency),
+      [URL_KEYS.CHART_START]: formatDateForURL(startDate),
+      [URL_KEYS.CHART_END]: formatDateForURL(endDate),
+      [URL_KEYS.CHART_PERIOD]: timePeriod,
+    });
+  }, [baseCurrency, targetCurrency, startDate, endDate, timePeriod]);
 
   const { data: timeSeriesData, loading, error, refetch } = useTimeSeriesRates({
     base: baseCurrency,
