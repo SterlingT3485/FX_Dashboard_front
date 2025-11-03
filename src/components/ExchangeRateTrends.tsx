@@ -90,8 +90,8 @@ const ExchangeRateTrends: React.FC = () => {
 
   // Update URL when state changes (only if current table is trend)
   useEffect(() => {
-    const currentTable = getStringParam(URL_KEYS.TABLE, 'date');
-    if (currentTable === 'trend') {
+    const currentTable = getStringParam(URL_KEYS.TABLE, 'table2');
+    if (currentTable === 'table2') {
       updateURLParams({
         [URL_KEYS.TREND_BASE]: baseCurrency,
         [URL_KEYS.TREND_TARGET]: targetCurrency,
